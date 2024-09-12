@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="/cookie.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js">
-</script>
 
 <form action="">
   <input id="n" type="hidden" value=""> 
@@ -15,9 +14,19 @@
 
 <script type="text/javascript" charset="utf-8">
   var socket = io();
-  socket.on('connect', function() {
-      socket.emit('my event', {data: 'I\'m connected!'});
-      $('#messages').append($('<li>').text("I connected"));
+  var uname = $.cookie("uname");
+  var uid = $.cookie("uid");  
+  console.log($.cookie());
+  console.log($.cookie("uname"));
+
+  socket.emit('join lobby', uname, uid);
+
+  socket.on('join lobby', function(player){
+      $('#players').append($('<li id="' + player + '">').text(player));
+  });
+
+  socket.on('leave lobby', function(player){
+      $('#' + player).remove();
   });
   
   socket.on('lobby message', function(msg){
@@ -25,11 +34,12 @@
   });
 
   $(document).ready(function () {
-      $('#n').val($.cookie('uname'));
+      $('#n').val(uname);
   });
+
   
   $('form').submit(function(){
-      socket.emit('lobby message', $('#m').val());
+      socket.emit('lobby message', uname + ": " + $('#m').val());
       console.log($('#m').val());
       $('#m').val('');
       return false;
