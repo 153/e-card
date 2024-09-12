@@ -1,0 +1,45 @@
+Basic e-card logic:
+
+Player 1 and Player 2 are assigned to Team A and Team B
+
+* Team A has 4 villager and 1 slave
+* Team B has 4 villager and 1 king
+
+villager vs villager = draw
+slave    vs villager = Team B
+villager vs king     = Team B
+slave    vs king     = Team A
+
+Team B winning is worth 1 point
+Team A winning is worth 5 points
+
+Match 1
+  Team A slave, Team B king
+  Round 1: King first
+  Round 2: Slave first
+  Round 3: King first
+
+Match 2:
+  Team A slave, Team B king
+  Round 1: Slave first
+  Round 2: King first
+  Round 3: Slave first
+
+
+
+login screen:
+- assign random ID
+- prompt username
+- set cookie
+- redirect to lobby
+
+lobby screen:
+- list usernames
+- chat
+
+game screen:
+- assign king/slave randomly
+- chat
+- pick villager or special
+- resolve
+- next round
