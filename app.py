@@ -19,6 +19,7 @@ def test_connect(auth):
 @socketio.on('disconnect')
 def test_disconnect():
     userdata = users[users2[request.sid]]
+    print(userdata)
     del users[users2[request.sid]]
     del users2[request.sid]
     print(userdata)
@@ -30,23 +31,29 @@ def test_disconnect():
 def join_lobby(uname, uid):
     room = "lobby"
     print(request.sid)
-    join_room(room)
+    join_room("lobby")
     users2[request.sid] = uid
-    emit("lobby message", f"{uname} has joined the lobby", to=room)
-    emit("join lobby", uname, to=room)
+    emit("lobby message", f"{uname} has joined the lobby", to="lobby")
+    emit("join lobby", uname, to="lobby")
+    print(users, users2)
     
 @socketio.on('lobby message')
 def lobby_message(msg):
     print('received message:', msg)
     if len(msg) < 1:
         return
-    emit("lobby message", msg, broadcast=True)
+    emit("lobby message", msg, to="lobby")
 
 @socketio.on('play card')
 def play_card(msg):
     print(msg)
 
-    
+@socketio.on('challenge')
+def challenge(data):
+    print(data)
+    player1, player2 = data["from"], data["to"]
+    emit("challenge", {"from":player1, "to":player2}, to="lobby")
+
 @app.route('/')
 def splash():
     check = request.cookies.get("uid"), request.cookies.get("uname")
@@ -86,9 +93,11 @@ def lobby():
     room = "lobby"
     out = ["<ul id='players'>"]
     for u in users:
-        if users[u][0] == check[1]:
+        username = users[u][0]
+        if username == check[1]:
             continue
-        out.append("<li>" + users[u][0])
+        out.append(f"<li id={username}> {username}")
+        out.append(f"<button class='challenge' value='{username}'>Challenge</button>")
     out.append("</ul>")
     with open("html/lobby.html", "r") as page:
         page = page.read()

@@ -22,7 +22,11 @@
   socket.emit('join lobby', uname, uid);
 
   socket.on('join lobby', function(player){
-      $('#players').append($('<li id="' + player + '">').text(player));
+      if (player == uname)
+	  return;
+      $('#players').append($(`<li id="${player}">`).text(player));
+      $('#players').append($(`<button class="challenge" value="${player}">Challenge</button>`));
+      $('#players').append("</li>");
   });
 
   socket.on('leave lobby', function(player){
@@ -33,10 +37,25 @@
       $('#messages').append($('<li>').text(msg));
   });
 
+  socket.on('challenge', function(data){
+      console.log(data);
+      var from = data.from;
+      var to = data.to;
+      console.log(from, to);
+      if (to == uname) {
+	  $(`#$('from') li`).append(`<button class="challenge" value="${from}">Accept</button>`);
+      };  
+  });
+		    
   $(document).ready(function () {
       $('#n').val(uname);
   });
 
+  $('body').on('click', '.challenge', function() {
+      var clicked = $(this).val();
+      console.log(clicked);
+      socket.emit("challenge", {"from":uname, "to":clicked});
+  });
   
   $('form').submit(function(){
       socket.emit('lobby message', uname + ": " + $('#m').val());
