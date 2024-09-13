@@ -4,16 +4,27 @@
 <script src="/cookie.js"></script>
 
 <style>
-  img { height: 110px;}
+  img { height: 150px;}
+  input[type=radio] {
+      display: none;
+  }
+  input[type=radio]:checked + label {
+      padding: 8px;
+      border: 3px solid red;
+  }
 </style>  
 
 <center><br><br><br>
 
 <h1>Select your card</h1>
 
-<form action="">
+CARD
+<br>
+
+<form action="" method="get">
   <input id="p1" type="hidden" value="{0}">
   <input id="p2" type="hidden" value="{1}">
+  <input name="mode" type="hidden" value="MODE">
   <div id="cards">
   </div>
   <br><br>
@@ -23,7 +34,7 @@
 <script>
   var socket = io();
 
-  var cards = ["citizen", "citizen", "citizen", "citizen", "slave"]
+  var cards = ["MODE", "citizen", "citizen", "citizen", "citizen"]
   function drawCard(card) {
       $('#cards').append($(`<input type="radio" id="${card}" name="card" value="${card}">`));
       $('#cards').append($(`<label for="${card}"><img src="/${card}.jpg"></label>`));
@@ -35,6 +46,10 @@
 	{
 	    drawCard(cards[i]);
 	};
-     });
+    });
+
+  $('form').submit(function(){
+      socket.emit('play card', {"card": $('input[name="card"]:checked').val()});
+  });
 </script>
 		   

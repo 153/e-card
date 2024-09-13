@@ -42,6 +42,10 @@ def lobby_message(msg):
         return
     emit("lobby message", msg, broadcast=True)
 
+@socketio.on('play card')
+def play_card(msg):
+    print(msg)
+
     
 @app.route('/')
 def splash():
@@ -91,10 +95,25 @@ def lobby():
     page = "<br>".join(out) + page
     return page
 
-@app.route('/game')
+@app.route('/game', methods=["GET", "POST"])
 def game():
+    print(request.form.keys())
+    try:
+        mode = request.args["mode"]
+    except:
+        mode = "slave"
+    try:
+        card = request.args["card"]
+    except:
+        card = None
+        
     with open("html/game.html", "r") as page:
         page = page.read()
+    page = page.replace("MODE", mode)
+    if card:
+        page = page.replace("CARD", f"<h2>You selected: {card}</h2>")
+    else:
+        page = page.replace("CARD", "")
     return page
 
 if __name__ == "__main__":
