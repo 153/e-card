@@ -6,7 +6,7 @@ from flask_socketio import SocketIO, send, emit, join_room, leave_room
 app = Flask(__name__,
             static_url_path = "",
             static_folder = "static")
-app.config['SECRET_KEY'] = "plabisajew"
+app.config['SECRET_KEY'] = "abcdefgh"
 socketio = SocketIO(app)
 
 users = {}
