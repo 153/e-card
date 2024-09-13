@@ -11,7 +11,6 @@ socketio = SocketIO(app)
 
 users = {}
 users2 = {}
-
 games = {}
 
 @socketio.on('connect')
@@ -21,16 +20,23 @@ def test_connect(auth):
 @socketio.on('disconnect')
 def test_disconnect():
     userdata = users[users2[request.sid]]
-    print(userdata)
+    user = userdata[0]
+    print(users)
+    print(users2)
+    print(games)
+    print("=====")
     del users[users2[request.sid]]
     del users2[request.sid]
     del games[user]
     for u in games:
-        if user in u:
+        if user in games[u]:
             del games[u][user]
     print(userdata)
-    emit("lobby message", f"{userdata[0]} has left the lobby", to="lobby")
-    emit("leave lobby", userdata[0], to="lobby")
+    print(users)
+    print(users2)
+    print(games)
+    emit("lobby message", f"{user} has left the lobby", to="lobby")
+    emit("leave lobby", user, to="lobby")
     print("Disconnected")
 
 @socketio.on('join lobby')
@@ -60,10 +66,12 @@ def challenge(data):
     player1, player2 = data["from"], data["to"]
     if player1 in games[player2]:
         print("Challenge accepted")
+    elif player2 in games[player1]:
+        return
     else:
-        games[player1] = [player2]
-    print(player1, player2)
-    emit("lobby challenge", data, to="lobby")
+        games[player1][player2] = {}
+        print(player1, player2)
+        emit("lobby challenge", data, to="lobby")
 
 @app.route('/')
 def splash():
@@ -109,11 +117,13 @@ def lobby():
         if username == check[1]:
             continue
         out.append(f"<li id={username}> {username}")
-        out.append(f"<button class='challenge' value='{username}'>Challenge</button>")
+        out[-1] += (f" <button class='challenge' value='{username}'>Challenge</button>")
+        out[-1] += (" </li>")
     out.append("</ul>")
+    out = "\n".join(out)
     with open("html/lobby.html", "r") as page:
         page = page.read()
-    page = "<br>".join(out) + page
+    page = out + page
     return page
 
 @app.route('/game', methods=["GET", "POST"])

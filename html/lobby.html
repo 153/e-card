@@ -24,9 +24,8 @@
   socket.on('join lobby', function(player){
       if (player == uname)
 	  return;
-      $('#players').append($(`<li id="${player}">`).text(player));
-      $('#players').append($(`<button class="challenge" value="${player}">Challenge</button>`));
-      $('#players').append("</li>");
+      $('#players').append($(`<li id="${player}">${player} </li>`));
+      $('#' + player).append($(` <button class="challenge" value="${player}">Challenge</button>`));
   });
 
   socket.on('leave lobby', function(player){
@@ -43,7 +42,8 @@
       var to = msg.to;
       console.log(from, to);
       if (to == uname) {
-	  $('#' + from).append(`<button class="challenge" value="${from}">Accept</button>`);
+	  $('#' + from).children("button:first").remove();
+	  $('#' + from).append(` <button class="challenge" value="${from}">Accept</button>`);
       };  
   });
 		    
