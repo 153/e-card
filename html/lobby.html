@@ -37,13 +37,13 @@
       $('#messages').append($('<li>').text(msg));
   });
 
-  socket.on('challenge', function(data){
-      console.log(data);
-      var from = data.from;
-      var to = data.to;
+  socket.on('lobby challenge', function(msg){
+      console.log(msg);
+      var from = msg.from;
+      var to = msg.to;
       console.log(from, to);
       if (to == uname) {
-	  $(`#$('from') li`).append(`<button class="challenge" value="${from}">Accept</button>`);
+	  $('#' + from).append(`<button class="challenge" value="${from}">Accept</button>`);
       };  
   });
 		    
@@ -54,7 +54,7 @@
   $('body').on('click', '.challenge', function() {
       var clicked = $(this).val();
       console.log(clicked);
-      socket.emit("challenge", {"from":uname, "to":clicked});
+      socket.emit("lobby challenge", {"from":uname, "to":clicked});
   });
   
   $('form').submit(function(){

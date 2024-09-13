@@ -12,6 +12,8 @@ socketio = SocketIO(app)
 users = {}
 users2 = {}
 
+games = {}
+
 @socketio.on('connect')
 def test_connect(auth):
     emit('my response', {'data': 'Connected'})
@@ -22,6 +24,10 @@ def test_disconnect():
     print(userdata)
     del users[users2[request.sid]]
     del users2[request.sid]
+    del games[user]
+    for u in games:
+        if user in u:
+            del games[u][user]
     print(userdata)
     emit("lobby message", f"{userdata[0]} has left the lobby", to="lobby")
     emit("leave lobby", userdata[0], to="lobby")
@@ -48,11 +54,16 @@ def lobby_message(msg):
 def play_card(msg):
     print(msg)
 
-@socketio.on('challenge')
+@socketio.on('lobby challenge')
 def challenge(data):
     print(data)
     player1, player2 = data["from"], data["to"]
-    emit("challenge", {"from":player1, "to":player2}, to="lobby")
+    if player1 in games[player2]:
+        print("Challenge accepted")
+    else:
+        games[player1] = [player2]
+    print(player1, player2)
+    emit("lobby challenge", data, to="lobby")
 
 @app.route('/')
 def splash():
@@ -82,6 +93,7 @@ def login():
     res.set_cookie("uname", value = uname)
     res.set_cookie("uid", value = uid)
     users[uid] = [uname, str(int(time.time()))]
+    games[uname] = {}
     return res
 
 @app.route('/lobby')
