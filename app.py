@@ -6,7 +6,7 @@ from flask_socketio import SocketIO, send, emit, join_room, leave_room
 app = Flask(__name__,
             static_url_path = "",
             static_folder = "static")
-app.config['SECRET_KEY'] = "setiostsetihest"
+app.config['SECRET_KEY'] = "plabisajew"
 socketio = SocketIO(app)
 
 users = {}
@@ -89,6 +89,12 @@ def lobby():
     with open("html/lobby.html", "r") as page:
         page = page.read()
     page = "<br>".join(out) + page
+    return page
+
+@app.route('/game')
+def game():
+    with open("html/game.html", "r") as page:
+        page = page.read()
     return page
 
 if __name__ == "__main__":

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="/cookie.js"></script>
+
+<style>
+  img { height: 110px;}
+</style>  
+
+<center><br><br><br>
+
+<h1>Select your card</h1>
+
+<form action="">
+  <input id="p1" type="hidden" value="{0}">
+  <input id="p2" type="hidden" value="{1}">
+  <div id="cards">
+  </div>
+  <br><br>
+  <input type="submit" value="SELECT">
+</form>  
+
+<script>
+  var socket = io();
+
+  var cards = ["citizen", "citizen", "citizen", "citizen", "slave"]
+  function drawCard(card) {
+      $('#cards').append($(`<input type="radio" id="${card}" name="card" value="${card}">`));
+      $('#cards').append($(`<label for="${card}"><img src="/${card}.jpg"></label>`));
+  };
+
+  $(document).ready(function()
+    {
+	for (var i = 0; i < cards.length; i++)
+	{
+	    drawCard(cards[i]);
+	};
+     });
+</script>
+		   
