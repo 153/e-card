@@ -21,19 +21,19 @@
 CARD
 <br>
 
-<form action="" method="get">
-  <input id="p1" type="hidden" value="{0}">
-  <input id="p2" type="hidden" value="{1}">
+<form action="" method="post">
+  <input name="player1" type="hidden" value="PLAYER1">
+  <input name="player2" type="hidden" value="PLAYER2">
   <input name="mode" type="hidden" value="MODE">
   <div id="cards">
   </div>
   <br><br>
   <input type="submit" value="SELECT">
-</form>  
+</form>
 
 <script>
   var socket = io();
-
+  var uname = $.cookie("uname");
   var cards = ["MODE", "citizen", "citizen", "citizen", "citizen"]
   function drawCard(card) {
       $('#cards').append($(`<input type="radio" id="${card}" name="card" value="${card}">`));
@@ -49,7 +49,7 @@ CARD
     });
 
   $('form').submit(function(){
-      socket.emit('play card', {"card": $('input[name="card"]:checked').val()});
+      socket.emit('play card', {"card": $('input[name="card"]:checked').val(), "player": uname});
   });
 </script>
 		   

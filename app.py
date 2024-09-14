@@ -21,20 +21,12 @@ def test_connect(auth):
 def test_disconnect():
     userdata = users[users2[request.sid]]
     user = userdata[0]
-    print(users)
-    print(users2)
-    print(games)
-    print("=====")
     del users[users2[request.sid]]
     del users2[request.sid]
     del games[user]
     for u in games:
         if user in games[u]:
             del games[u][user]
-    print(userdata)
-    print(users)
-    print(users2)
-    print(games)
     emit("lobby message", f"{user} has left the lobby", to="lobby")
     emit("leave lobby", user, to="lobby")
     print("Disconnected")
@@ -47,7 +39,6 @@ def join_lobby(uname, uid):
     users2[request.sid] = uid
     emit("lobby message", f"{uname} has joined the lobby", to="lobby")
     emit("join lobby", uname, to="lobby")
-    print(users, users2)
     
 @socketio.on('lobby message')
 def lobby_message(msg):
@@ -62,30 +53,26 @@ def play_card(msg):
 
 @socketio.on('lobby challenge')
 def challenge(data):
-    print(data)
     player1, player2 = data["from"], data["to"]
+    print(f"from {player1} to {player2}")
     if player1 in games[player2]:
         print("Challenge accepted")
+        print(games)
+        emit("lobby accept", {"from": player2, "to":player1}, to="lobby")
     elif player2 in games[player1]:
         return
     else:
         games[player1][player2] = {}
-        print(player1, player2)
         emit("lobby challenge", data, to="lobby")
 
 @app.route('/')
 def splash():
     check = request.cookies.get("uid"), request.cookies.get("uname")
-    print(check)
-    print(users)
-    if check[0] in users:
-        return redirect("/lobby")
     userid = random.randrange(1001, 5000)
     with open("html/splash.html", "r") as test_p:
         test_p = test_p.read()
     return test_p.format(userid)
     
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == "GET":
@@ -93,13 +80,12 @@ def login():
     uname = request.form['uname']
     uid = request.form['uid']
     for user in users:
-        print(uname)
-        print(users[user])
         if users[user][0] == uname:
             return redirect(url_for('splash'))
-    res = make_response(redirect('/'))
+    res = make_response(redirect('/lobby'))
     res.set_cookie("uname", value = uname)
     res.set_cookie("uid", value = uid)
+    print(uname, uid)
     users[uid] = [uname, str(int(time.time()))]
     games[uname] = {}
     return res
@@ -126,20 +112,26 @@ def lobby():
     page = out + page
     return page
 
-@app.route('/game', methods=["GET", "POST"])
+@app.route('/game', methods=["POST"])
 def game():
-    print(request.form.keys())
-    try:
-        mode = request.args["mode"]
-    except:
+    player1 = request.form["player1"]
+    player2 = request.form["player2"]
+    you_are = request.cookies.get("uname")
+    print(player1, player2, you_are)
+    
+    if player1 == you_are:
+        mode = "king"
+    else:
         mode = "slave"
     try:
-        card = request.args["card"]
+        card = request.form["card"]
     except:
         card = None
         
     with open("html/game.html", "r") as page:
         page = page.read()
+    page = page.replace("PLAYER1", player1)
+    page = page.replace("PLAYER2", player2)    
     page = page.replace("MODE", mode)
     if card:
         page = page.replace("CARD", f"<h2>You selected: {card}</h2>")
@@ -149,5 +141,3 @@ def game():
 
 if __name__ == "__main__":
     socketio.run(app)
-
-
