@@ -24,10 +24,10 @@ def test_disconnect():
     user = userdata[0]
     del users[users2[request.sid]]
     del users2[request.sid]
-    del games[user]
-    for u in games:
-        if user in games[u]:
-            del games[u][user]
+#    del games[user]
+#    for u in games:
+#        if user in games[u]:
+#            del games[u][user]
     emit("lobby message", f"{user} has left the lobby", to="lobby")
     emit("leave lobby", user, to="lobby")
     print("Disconnected")
@@ -50,8 +50,26 @@ def lobby_message(msg):
 
 @socketio.on('play card')
 def play_card(msg):
-    print(msg)
+    print(games)
+    player1 = msg["player1"]
+    player2 = msg["player2"]
+    player = msg["player"]
+    card = msg["card"]
+    cnt = games[player1][player2]["cnt"]
+    print(player, card)
+    games[player1][player2][player] = card
+    if len(games[player1][player2]) < 2:
+        return
+    print(games[player1][player2])
+    result = resolve_game(games[player1][player2])
+    if result:
+        emit("round won", {"player1": player1, "player2": player2, "winner": result})
+        print("""emit("round won", {"player1": player1, "player2": player2, "winner": result})""")
+    else:
+        emit("round next", {"player1": player1, "player2": player2, "cnt": cnt + 1})
+        print("""emit("round next", {"player1": player1, "player2": player2, "cnt": cnt + 1})""")
 
+        
 @socketio.on('lobby challenge')
 def challenge(data):
     player1, player2 = data["from"], data["to"]
@@ -63,7 +81,7 @@ def challenge(data):
     elif player2 in games[player1]:
         return
     else:
-        games[player1][player2] = {}
+        games[player1][player2] = {"cnt":0}
         emit("lobby challenge", data, to="lobby")
 
 @app.route('/')
@@ -80,6 +98,8 @@ def login():
         return redirect(url_for('splash'))
     uname = request.form['uname']
     uid = request.form['uid']
+    if uname in ["cnt"]:
+        return
     for user in users:
         if users[user][0] == uname:
             return redirect(url_for('splash'))
@@ -96,7 +116,6 @@ def lobby():
     check = request.cookies.get("uid"), request.cookies.get("uname")
     if check[0] not in users:
         return redirect("/")
-
     room = "lobby"
     out = ["<ul id='players'>"]
     for u in users:
@@ -118,6 +137,8 @@ def game():
     player1 = request.form["player1"]
     player2 = request.form["player2"]
     you_are = request.cookies.get("uname")
+    cnt = games[player1][player2]["cnt"]
+    
     print(player1, player2, you_are)
     
     if player1 == you_are:
@@ -134,11 +155,20 @@ def game():
     page = page.replace("PLAYER1", player1)
     page = page.replace("PLAYER2", player2)    
     page = page.replace("MODE", mode)
+    page = page.replace("CNT", str(cnt))
     if card:
         page = page.replace("CARD", f"<h2>You selected: {card}</h2>")
     else:
         page = page.replace("CARD", "")
     return page
+
+def resolve_game(gamestate):
+    players = list(gamestate.keys())
+    if gamestate[players[0]] == "king":
+        if gamestate[players[1]] == "slave":
+            return players[1]
+        return players[0]
+    return False
 
 if __name__ == "__main__":
     socketio.run(app)

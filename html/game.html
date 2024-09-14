@@ -34,7 +34,12 @@ CARD
 <script>
   var socket = io();
   var uname = $.cookie("uname");
-  var cards = ["MODE", "citizen", "citizen", "citizen", "citizen"]
+  var player1 = $.cookie("player1");
+  var player2 = $.cookie("player2");
+  var cards = ["MODE"]
+  for (i = CNT; i < 4; i++) {
+      cards.push("citizen");
+  };
   function drawCard(card) {
       $('#cards').append($(`<input type="radio" id="${card}" name="card" value="${card}">`));
       $('#cards').append($(`<label for="${card}"><img src="/${card}.jpg"></label>`));
@@ -48,7 +53,8 @@ CARD
   });
 
   $('form').submit(function(){
-      socket.emit('play card', {"card": $('input[name="card"]:checked').val(), "player": uname});
+      socket.emit('play card', {"card": $('input[name="card"]:checked').val(),
+				"player": uname, "player1": "PLAYER1", "player2": "PLAYER2"});
   });
 </script>
 		   
