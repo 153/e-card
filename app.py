@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import random
 import time
 from flask import Flask, make_response, request, redirect, session, url_for
